@@ -7,18 +7,17 @@ Das Projekt bietet sowohl eine interaktive WPF-Oberfläche für manuelle Eingrif
 Die Struktur wurde für maximale Portabilität optimiert. 
 Alle Pfade werden relativ zum Skriptverzeichnis aufgelöst.
 
-
 CitrixProfileCleaner/
 │
-├── CitrixProfileCleaner_GUI.ps1	# Haupteinstiegspunkt (WPF-Oberfläche)
-├── CitrixProfileCleaner_CLI.ps1	# Autarker Entrypoint für Scheduled Jobs (CLI)
+├── CitrixProfileCleaner_GUI.ps1     # Haupteinstiegspunkt (WPF-Oberfläche)
+├── CitrixProfileCleaner_CLI.ps1     # Autarker Entrypoint für Scheduled Jobs (CLI)
 │
 ├── Modules/
-│   ├── ProfileCleanupEngine.psm1	# Kern-Logik: Löschprozesse & Altersprüfung
+│   ├── ProfileCleanupEngine.psm1    # Kern-Logik: Löschprozesse & Altersprüfung
 │   └── Merge-ProfileCleanerSessionCSVs.psm1 # Report-Generator (LOGS/HTML)
 │
-├── Jobs/                           # JSON-Aufgabenbeschreibungen (Vollpfade)
-└── Logs/                           # Sitzungsprotokolle (CSV) & Finalisierte Berichte (HTML)
+├── Jobs/                            # JSON-Aufgabenbeschreibungen (Vollpfade)
+└── Logs/                            # Sitzungsprotokolle (CSV) & Berichte (HTML)
 
 
 ⚙️ Funktionsweise der Engine
@@ -119,4 +118,8 @@ Dieser enthält:
 
 -Log-File: Technisches Protokoll des Durchlaufs.
 
+⚖️ Lizenz & Urheberschutz
+Dieses Projekt ist unter der GNU GPLv3 lizenziert. Dies stellt sicher, dass der Code offen bleibt, Verbesserungen geteilt werden müssen und mein Urheberrecht als Entwickler gewahrt bleibt.
+
 Stand: 30.01.2026 (v1.0 Meilenstein erreicht)
+Copyright 2026 Norman Thiel

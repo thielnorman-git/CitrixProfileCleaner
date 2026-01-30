@@ -1,0 +1,11 @@
+{
+    "Label": "excluded-WindowsWebCache",
+    "Type": "ProfileFolder",
+    "SubFolder": "UPM_Profile\\AppData\\Local\\Microsoft\\Windows\\WebCache",
+    "RootPaths": [
+        "D:\\CTX-Profiles\\ZDRS",
+        "D:\\CTX-Profiles\\ZDRW",
+        "D:\\CTX-Profiles\\ZDRS-AMOR"
+    ],
+    "Enabled": false
+}

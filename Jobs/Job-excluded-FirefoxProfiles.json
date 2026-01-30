@@ -1,0 +1,11 @@
+{
+    "Label": "excluded-FirefoxProfiles",
+    "Type": "ProfileFolder",
+    "SubFolder": "UPM_Profile\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles",
+    "RootPaths": [
+        "D:\\CTX-Profiles\\ZDRS",
+        "D:\\CTX-Profiles\\ZDRW",
+        "D:\\CTX-Profiles\\ZDRS-AMOR"
+    ],
+    "Enabled": false
+}

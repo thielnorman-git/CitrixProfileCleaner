@@ -1,0 +1,11 @@
+{
+    "Label": "excluded-BasisApp",
+    "Type": "ProfileFolder",
+    "SubFolder": "UPM_Profile\\AppData\\Local\\Basis",
+    "RootPaths": [
+        "D:\\CTX-Profiles\\ZDRS",
+        "D:\\CTX-Profiles\\ZDRW",
+        "D:\\CTX-Profiles\\ZDRS-AMOR"
+    ],
+    "Enabled": false
+}

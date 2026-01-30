@@ -1,0 +1,12 @@
+{
+    "Label": "excluded-roaming-iMedOne Cache",
+    "Type": "ProfileFolder",
+    "SubFolder": "UPM_Profile\\AppData\\Roaming\\iMedOne",
+    "RootPaths": [
+        "D:\\CTX-Profiles\\ZDRS",
+        "D:\\CTX-Profiles\\ZDRW",
+        "D:\\CTX-Profiles\\ZDRS-AMOR",
+        "P:\\Profiles-01\\"
+    ],
+    "Enabled": false
+}

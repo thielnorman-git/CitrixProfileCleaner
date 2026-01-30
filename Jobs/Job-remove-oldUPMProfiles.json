@@ -1,0 +1,12 @@
+{
+    "Label": "UPM Profile Cleanup",
+    "Type": "UPMCleanup",
+    "SubFolder": "UPM_Profile",
+    "MaxAgeDays": 80,
+    "RootPaths": [
+       "D:\\CTX-Profiles\\ZDRS",
+        "D:\\CTX-Profiles\\ZDRW",
+        "D:\\CTX-Profiles\\ZDRS-AMOR"
+    ],
+    "Enabled": true
+}

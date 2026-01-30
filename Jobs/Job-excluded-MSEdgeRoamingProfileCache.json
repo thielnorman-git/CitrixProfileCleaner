@@ -1,0 +1,11 @@
+{
+    "Label": "excluded-EdgeRoamingProfileCache",
+    "Type": "ProfileFolder",
+    "SubFolder": "UPM_Profile\\AppData\\Roaming\\edge-profile\\Default\\Cache",
+    "RootPaths": [
+        "D:\\CTX-Profiles\\ZDRS",
+        "D:\\CTX-Profiles\\ZDRW",
+        "D:\\CTX-Profiles\\ZDRS-AMOR"
+    ],
+    "Enabled": false
+}

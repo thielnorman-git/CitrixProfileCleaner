@@ -3,6 +3,7 @@ Citrix Profile Cleaner 2026 (Gesamtdokumentation)
 Ein hybrides Administrations-Tool zur effizienten Verwaltung und Bereinigung von Benutzerprofilen und Verzeichnissen. Das Projekt bietet sowohl eine interaktive WPF-Oberfläche für manuelle Eingriffe als auch eine CLI-Schnittstelle für automatisierte Abläufe.
 
 📂 Projektstruktur
+
 Die Struktur wurde für maximale Portabilität optimiert. Alle Pfade werden relativ zum Skriptverzeichnis aufgelöst.
 
 ```text
@@ -19,6 +20,7 @@ CitrixProfileCleaner/
 ```
 
 ⚙️ Funktionsweise der Engine
+
 Die Engine verarbeitet Vollpfade (RootPaths), die direkt in den Job-Dateien definiert sind. Ein manuelles Auswählen eines Basisverzeichnisses ist nicht erforderlich.
 
 1. Citrix UPM Profile (Type: "UPMCleanup")
@@ -42,8 +44,6 @@ SubFolder    String     Relativer Pfad zum Zielordner (nur bei ProfileFolder).
 MaxAgeDays   Integer    Schwellenwert für die Löschung in Tagen.
 Enabled      Boolean    Schaltet den Job aktiv (true) oder inaktiv (false).
 ```
-
-JSON ConfigFiles
 
 Beispiel: Template_UPMCleanup_Profile.json
 ```text

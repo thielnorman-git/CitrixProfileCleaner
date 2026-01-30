@@ -1,12 +1,8 @@
 Profile Cleaner 2026 (Gesamtdokumentation)
-
-Ein hybrides Administrations-Tool zur effizienten Verwaltung und Bereinigung von Benutzerprofilen und Verzeichnissen. 
-Das Projekt bietet sowohl eine interaktive WPF-Oberfläche für manuelle Eingriffe als auch eine CLI-Schnittstelle für automatisierte Abläufe.
+Ein hybrides Administrations-Tool zur effizienten Verwaltung und Bereinigung von Benutzerprofilen und Verzeichnissen. Das Projekt bietet sowohl eine interaktive WPF-Oberfläche für manuelle Eingriffe als auch eine CLI-Schnittstelle für automatisierte Abläufe.
 
 📂 Projektstruktur
-Die Struktur wurde für maximale Portabilität optimiert. 
-Alle Pfade werden relativ zum Skriptverzeichnis aufgelöst.
-
+Die Struktur wurde für maximale Portabilität optimiert. Alle Pfade werden relativ zum Skriptverzeichnis aufgelöst.
 
 ```text
 CitrixProfileCleaner/
@@ -19,49 +15,39 @@ CitrixProfileCleaner/
 │
 ├── Jobs/                            # JSON-Aufgabenbeschreibungen (Vollpfade)
 └── Logs/                            # Sitzungsprotokolle (CSV) & Berichte (HTML)
-**```**
+```
 
 ⚙️ Funktionsweise der Engine
-
-Die Engine verarbeitet Vollpfade (RootPaths), die direkt in den Job-Dateien definiert sind. 
-Ein manuelles Auswählen eines Basisverzeichnisses ist nicht erforderlich.
+Die Engine verarbeitet Vollpfade (RootPaths), die direkt in den Job-Dateien definiert sind. Ein manuelles Auswählen eines Basisverzeichnisses ist nicht erforderlich.
 
 1. Citrix UPM Profile (Type: "UPMCleanup")
-
 Ziel: Vollständige Entfernung alter Profilverzeichnisse zur Speicherplatzrückgewinnung.
 
-Prüfung: Primär wird die UPMSettings.ini [INI] im Profil ausgelesen (präzisester Logout-Zeitstempel). Existiert keine UPMSettings.ini, wird das Änderungsdatum des Benutzerordners [DIR] als Fallback ermittelt.
+Prüfung: Primär wird die UPMSettings.ini im Profil ausgelesen.
 
-Aktion: Wenn das Alter $\ge$ MaxAgeDays ist, wird das gesamte Profilverzeichnis gelöscht.
+Aktion: Wenn das Alter >= MaxAgeDays ist, wird das gesamte Profilverzeichnis gelöscht.
 
-Sicherheit: Inkludiert automatische Rechteübernahme und Berechtigungskorrektur für blockierte Profile.
-
-2. Ordner-Bereinigung (Type: "ProfileFolder")
-
-Ziel: Gezielte Bereinigung von Unterordnern (z. B. Temp-Verzeichnisse, Browser-Caches).
-
-Prüfung: Keine Altersprüfung. Alle Treffer im definierten SubFolder innerhalb der User-Verzeichnisse werden verarbeitet.
-
-Aktion: Löscht den Inhalt des Zielpfads rekursiv.
+Sicherheit: Inkludiert automatische Rechteübernahme für blockierte Profile.
 
 🛠 Konfiguration (JSON-Jobs)
-
-Die Jobs definieren ihre Ziele über absolute Pfade. 
-Mehrere Pfade pro Job sind über ein Array möglich.
+Die Jobs definieren ihre Ziele über absolute Pfade.
 
 ```text
-Parameter	Typ	Beschreibung
-Label		String	Anzeigename der Aufgabe in der GUI.
-Type		String	UPMCleanup (Profil-Logik) oder ProfileFolder (Inhalt löschen).
-RootPaths	Array	Vollständige Pfade zu den Profil-Speichern (z.B. \\Server\Share\Profiles\).
-SubFolder	String	Relativer Pfad zum Zielordner innerhalb des User-Profils.
-MaxAgeDays	Integer	Schwellenwert für die Löschung in Tagen (nur bei UPMCleanup).
-Enabled		Boolean	Schaltet den Job aktiv (true) oder inaktiv (false).
-**```**
-Beispiele: 
+Parameter    Typ        Beschreibung
+Label        String     Anzeigename der Aufgabe in der GUI.
+Type         String     UPMCleanup (Profil-Logik) oder ProfileFolder (Inhalt löschen).
+RootPaths    Array      Vollständige Pfade zu den Profil-Speichern.
+SubFolder    String     Relativer Pfad zum Zielordner (nur bei ProfileFolder).
+MaxAgeDays   Integer    Schwellenwert für die Löschung in Tagen.
+Enabled      Boolean    Schaltet den Job aktiv (true) oder inaktiv (false).
+Beispiel: Template_UPMCleanup.json
+```
 
+JSON ConfigFiles
+
+Beispiel: UPM_Profile.json
 ```text
-Template_UPMCleanup.json
+JSON
 {
     "Label": "VORLAGE: Citrix UPM Profile (30 Tage)",
     "Type": "UPMCleanup",
@@ -73,10 +59,11 @@ Template_UPMCleanup.json
     "Enabled": true,
     "Comment": "Löscht das gesamte Profilverzeichnis, wenn der Logout länger als 30 Tage her ist."
 }
-**```**
+```
 
+Beispiel: Template_Folder.json
 ```text
-Template_Folder.json
+JSON
 {
     "Label": "VORLAGE: Teams Cache Bereinigung",
     "Type": "ProfileFolder",
@@ -86,9 +73,10 @@ Template_Folder.json
     "SubFolder": "AppData\\Roaming\\Microsoft\\Teams\\Cache",
     "MaxAgeDays": 0,
     "Enabled": false,
-    "Comment": "Löscht nur den Inhalt des SubFolders in jedem Profil, unabhängig vom Alter."
+    "Comment": "Löscht nur den Inhalt des SubFolders."
 }
-**```**
+```
+
 🚀 Nutzung & Automatisierung
 
 Manueller Modus (GUI)

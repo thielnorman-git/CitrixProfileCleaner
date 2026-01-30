@@ -41,12 +41,11 @@ RootPaths    Array      Vollständige Pfade zu den Profil-Speichern.
 SubFolder    String     Relativer Pfad zum Zielordner (nur bei ProfileFolder).
 MaxAgeDays   Integer    Schwellenwert für die Löschung in Tagen.
 Enabled      Boolean    Schaltet den Job aktiv (true) oder inaktiv (false).
-Beispiel: Template_UPMCleanup.json
 ```
 
 JSON ConfigFiles
 
-Beispiel: UPM_Profile.json
+Beispiel: Template_UPMCleanup_Profile.json
 ```text
 JSON
 {

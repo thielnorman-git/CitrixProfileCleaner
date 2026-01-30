@@ -7,8 +7,9 @@ Das Projekt bietet sowohl eine interaktive WPF-Oberfläche für manuelle Eingrif
 Die Struktur wurde für maximale Portabilität optimiert. 
 Alle Pfade werden relativ zum Skriptverzeichnis aufgelöst.
 
+
+```text
 CitrixProfileCleaner/
-│
 ├── CitrixProfileCleaner_GUI.ps1     # Haupteinstiegspunkt (WPF-Oberfläche)
 ├── CitrixProfileCleaner_CLI.ps1     # Autarker Entrypoint für Scheduled Jobs (CLI)
 │
@@ -18,7 +19,7 @@ CitrixProfileCleaner/
 │
 ├── Jobs/                            # JSON-Aufgabenbeschreibungen (Vollpfade)
 └── Logs/                            # Sitzungsprotokolle (CSV) & Berichte (HTML)
-
+**```**
 
 ⚙️ Funktionsweise der Engine
 
@@ -48,6 +49,7 @@ Aktion: Löscht den Inhalt des Zielpfads rekursiv.
 Die Jobs definieren ihre Ziele über absolute Pfade. 
 Mehrere Pfade pro Job sind über ein Array möglich.
 
+```text
 Parameter	Typ	Beschreibung
 Label		String	Anzeigename der Aufgabe in der GUI.
 Type		String	UPMCleanup (Profil-Logik) oder ProfileFolder (Inhalt löschen).
@@ -55,9 +57,10 @@ RootPaths	Array	Vollständige Pfade zu den Profil-Speichern (z.B. \\Server\Share
 SubFolder	String	Relativer Pfad zum Zielordner innerhalb des User-Profils.
 MaxAgeDays	Integer	Schwellenwert für die Löschung in Tagen (nur bei UPMCleanup).
 Enabled		Boolean	Schaltet den Job aktiv (true) oder inaktiv (false).
-
+**```**
 Beispiele: 
 
+```text
 Template_UPMCleanup.json
 {
     "Label": "VORLAGE: Citrix UPM Profile (30 Tage)",
@@ -70,8 +73,9 @@ Template_UPMCleanup.json
     "Enabled": true,
     "Comment": "Löscht das gesamte Profilverzeichnis, wenn der Logout länger als 30 Tage her ist."
 }
+**```**
 
-
+```text
 Template_Folder.json
 {
     "Label": "VORLAGE: Teams Cache Bereinigung",
@@ -84,7 +88,7 @@ Template_Folder.json
     "Enabled": false,
     "Comment": "Löscht nur den Inhalt des SubFolders in jedem Profil, unabhängig vom Alter."
 }
-
+**```**
 🚀 Nutzung & Automatisierung
 
 Manueller Modus (GUI)

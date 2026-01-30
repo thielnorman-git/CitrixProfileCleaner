@@ -110,7 +110,8 @@ Dieser enthält:
 
 -Log-File: Technisches Protokoll des Durchlaufs.
 
-⚖️ Lizenz & Urheberschutz
+⚖️ Lizenz & Urheberschutz:
+
 Dieses Projekt ist unter der GNU GPLv3 lizenziert. Dies stellt sicher, dass der Code offen bleibt, Verbesserungen geteilt werden müssen und mein Urheberrecht als Entwickler gewahrt bleibt.
 
 Stand: 30.01.2026 (v1.0 Meilenstein erreicht)

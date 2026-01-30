@@ -1,4 +1,5 @@
 Profile Cleaner 2026 (Gesamtdokumentation)
+
 Ein hybrides Administrations-Tool zur effizienten Verwaltung und Bereinigung von Benutzerprofilen und Verzeichnissen. Das Projekt bietet sowohl eine interaktive WPF-Oberfläche für manuelle Eingriffe als auch eine CLI-Schnittstelle für automatisierte Abläufe.
 
 📂 Projektstruktur

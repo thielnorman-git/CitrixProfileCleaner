@@ -148,8 +148,9 @@ function Invoke-ProfileCleanupJob {
                         AuditDetails = "" 
                     }
 
-                    # Entscheidung: Soll gelöscht werden? (UPM prüft Alter, SubFolder-Jobs löschen immer)
-                    $shouldDelete = if ($isUpm) { $age -ge $maxAge } else { $true }
+                    # --- BESPROCHENE ÄNDERUNG: Löschlogik verfeinert ---
+                    # UPM prüft Alter, SubFolder-Jobs löschen nur wenn MB > 0 (sonst Status GEPRÜFT)
+                    $shouldDelete = if ($isUpm) { $age -ge $maxAge } else { $sizeMB -gt 0 }
 
                     if ($shouldDelete) {
                         if ($DryRun) {

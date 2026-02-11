@@ -48,14 +48,12 @@ function Merge-ProfileCleanerSessionCSVs {
     }
 
     # --- BERECHNUNG DER KENNZAHLEN (DYNAMISCH) ---
-    # Wir zählen sowohl echte Löschungen als auch Simulationen für die Summe
     $relevantData = $data | Where-Object { $_.Status -eq "Erfolgreich gelöscht" -or $_.Status -eq "SIMULATION" }
     $totalMB = ($relevantData | Measure-Object -Property MB -Sum).Sum
     
-    # Prüfung: Befinden wir uns im Simulationsmodus?
     $isSimulationMode = $data.Status -contains "SIMULATION"
     $labelEinsparung = if ($isSimulationMode) { "Mögliche Einsparung" } else { "Einsparung" }
-    $statColor = if ($isSimulationMode) { "#f59e0b" } else { "var(--success-text)" } # Orange für Simulation, Grün für Erfolg
+    $statColor = if ($isSimulationMode) { "#f59e0b" } else { "#107c10" }
 
     $timeStamp = Get-Date -Format "dd.MM.yyyy HH:mm"
     $displayTotal = if ($totalMB -ge 1024) { 
@@ -82,7 +80,7 @@ function Merge-ProfileCleanerSessionCSVs {
             --neutral-bg: #f3f2f1; --neutral-text: #605e5c;
         }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 40px; }
-        .container { max-width: 1600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .container { max-width: 1700px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: auto; }
         .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edebe9; padding-bottom: 20px; margin-bottom: 20px; }
         h2 { margin: 0; color: var(--primary); font-weight: 300; font-size: 26px; }
         .btn-log { 
@@ -95,9 +93,21 @@ function Merge-ProfileCleanerSessionCSVs {
         .stat-item { display: flex; flex-direction: column; }
         .stat-label { font-size: 11px; text-transform: uppercase; color: #605e5c; letter-spacing: 0.8px; margin-bottom: 5px; }
         .stat-value { font-size: 22px; font-weight: 600; color: var(--text); }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { background: #faf9f8; text-align: left; padding: 15px 12px; font-size: 13px; cursor: pointer; border-bottom: 2px solid #edebe9; position: sticky; top: 0; z-index: 10; }
-        td { padding: 12px; font-size: 12px; border-bottom: 1px solid #edebe9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* TABLE DYNAMISCH ANPASSEN */
+        table { width: 100%; border-collapse: collapse; table-layout: auto; min-width: 100%; }
+        th { 
+            background: #faf9f8; text-align: left; padding: 15px 12px; font-size: 13px; 
+            cursor: pointer; border-bottom: 2px solid #edebe9; position: sticky; top: 0; z-index: 10;
+            white-space: nowrap; user-select: none; position: relative;
+        }
+        .resizer {
+            position: absolute; right: 0; top: 0; width: 6px; height: 100%;
+            cursor: col-resize; z-index: 11;
+        }
+        .resizer:hover { background: var(--primary); opacity: 0.5; }
+
+        td { padding: 12px; font-size: 12px; border-bottom: 1px solid #edebe9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         tr:hover { background-color: #fcfcfc; }
         .status { padding: 4px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; display: inline-block; }
         .status-Erfolgreich-gelöscht, .status-ERFOLG { background: var(--success-bg); color: var(--success-text); }
@@ -127,12 +137,12 @@ function Merge-ProfileCleanerSessionCSVs {
         <table id="reportTable">
             <thead>
                 <tr>
-                    <th style="width:12%">Job</th>
-                    <th style="width:38%">Pfad</th>
-                    <th style="width:10%">Größe</th>
-                    <th style="width:8%">Alter</th>
-                    <th style="width:17%">Status</th>
-                    <th style="width:15%">Ausgeführt von</th>
+                    <th>Job</th>
+                    <th>Pfad</th>
+                    <th>Größe</th>
+                    <th>Alter</th>
+                    <th>Status</th>
+                    <th>Ausgeführt von</th>
                 </tr>
             </thead>
             <tbody>
@@ -143,9 +153,7 @@ function Merge-ProfileCleanerSessionCSVs {
         $valMB = [double]$_.MB
         $valAge = if ($_.Alter -as [int]) { [int]$_.Alter } else { 0 }
         $displayAge = if ($_.Alter -eq "N/A") { "N/A" } else { "$valAge Tage" }
-        
         $displaySize = if ($valMB -ge 1024) { "$([math]::Round($valMB / 1024, 2)) GB" } else { "$valMB MB" }
-        # Bindestriche für CSS Klassen-Sicherheit
         $statusClass = "status-$($_.Status.Replace(' ', '-'))"
         
         "                <tr>
@@ -163,23 +171,71 @@ function Merge-ProfileCleanerSessionCSVs {
         </table>
     </div>
     <script>
+        // --- PERFORMANCE SORTIERUNG (DOM-DETACH) ---
         const getCellValue = (tr, idx) => {
             const td = tr.children[idx];
             return td.getAttribute('data-sort') || td.innerText || td.textContent;
         };
+
         const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
             v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
             )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
 
-        document.querySelectorAll('th').forEach(th => th.addEventListener('click', function() {
+        document.querySelectorAll('th').forEach(th => th.addEventListener('click', function(e) {
+            if (e.target.classList.contains('resizer')) return;
+            
             const table = th.closest('table');
             const tbody = table.querySelector('tbody');
+            document.body.style.cursor = 'wait';
+            
+            const parent = tbody.parentNode;
+            parent.removeChild(tbody); // Detach für Performance
+
+            const rows = Array.from(tbody.querySelectorAll('tr'));
             const index = Array.from(th.parentNode.children).indexOf(th);
             this.asc = !this.asc;
-            Array.from(tbody.querySelectorAll('tr'))
-                .sort(comparer(index, this.asc))
-                .forEach(tr => tbody.appendChild(tr));
+
+            rows.sort(comparer(index, this.asc)).forEach(tr => tbody.appendChild(tr));
+
+            parent.appendChild(tbody);
+            document.body.style.cursor = 'default';
         }));
+
+        // --- DYNAMISCHER RESIZER (HYBRID) ---
+        document.querySelectorAll('th').forEach(th => {
+            const resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            resizer.addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                const startX = e.pageX;
+                const startWidth = th.offsetWidth;
+                const table = th.closest('table');
+
+                // Fixiere Layout erst beim ersten Resize
+                if (table.style.tableLayout !== 'fixed') {
+                    table.querySelectorAll('th').forEach(h => h.style.width = h.offsetWidth + 'px');
+                    table.style.tableLayout = 'fixed';
+                }
+
+                const onMouseMove = (e) => {
+                    const newWidth = (startWidth + (e.pageX - startX)) + 'px';
+                    th.style.width = newWidth;
+                    th.style.minWidth = newWidth;
+                };
+
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+        });
     </script>
 </body>
 </html>

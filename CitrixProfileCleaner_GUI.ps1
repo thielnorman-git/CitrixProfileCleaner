@@ -45,7 +45,7 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 # Hauptfenster Definition
 $win = New-Object System.Windows.Window -Property @{ 
     Title = "Citrix Profile Cleaner 2026 - Professional"; 
-    Width = 950; Height = 920; 
+    Width = 600; Height = 800; 
     Background = "#F0F0F0";
     WindowStartupLocation = "CenterScreen"
 }

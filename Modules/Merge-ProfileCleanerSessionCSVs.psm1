@@ -4,18 +4,15 @@
 .AUTHOR
     Norman Thiel
 .VERSION
-    1.0 (Meilenstein 30.01.2026)
+    1.1 (Revision 20.02.2026)
 .DESCRIPTION
     Aggregiert CSV-Daten einer Reinigungssitzung zu einem interaktiven HTML-Bericht.
-    Enthält eine Zusammenfassung der Einsparungen und detaillierte Status-Informationen.
+    Erweitert um die Anzeige der Audit-Details aus der Engine.
 .FEATURES
-    - Fest integrierter "Log öffnen"-Button im Header für direkten Zugriff auf Cleanup_Details.log.
-    - Dynamische Einheiten-Umrechnung (MB zu GB) für die Gesamteinsparung.
-    - Flat Design UI mit CSS-Varianten für Status-Farbcodierung.
-    - JavaScript-basierte Tabellensortierung direkt im Browser.
-    - Robustes Daten-Mapping (Punkt/Komma-Korrektur bei Größenangaben).
-.NOTES
-    Abhängigkeiten: Cleanup_Data.csv im SessionPath.
+    - Fest integrierter "Log öffnen"-Button im Header.
+    - Dynamische Einheiten-Umrechnung (MB zu GB).
+    - NEU: Spalte für AuditDetails integriert.
+    - JavaScript-basierte Tabellensortierung und Spalten-Resizing.
 #>
 
 function Merge-ProfileCleanerSessionCSVs {
@@ -45,9 +42,13 @@ function Merge-ProfileCleanerSessionCSVs {
         if (-not $row.PSObject.Properties['RunBy']) { 
             Add-Member -InputObject $row -NoteProperty "RunBy" -Value "N/A" 
         }
+        # Sicherstellen, dass AuditDetails existieren (neu aus Engine)
+        if (-not $row.PSObject.Properties['AuditDetails']) { 
+            Add-Member -InputObject $row -NoteProperty "AuditDetails" -Value "" 
+        }
     }
 
-    # --- BERECHNUNG DER KENNZAHLEN (DYNAMISCH) ---
+    # --- BERECHNUNG DER KENNZAHLEN ---
     $relevantData = $data | Where-Object { $_.Status -eq "Erfolgreich gelöscht" -or $_.Status -eq "SIMULATION" }
     $totalMB = ($relevantData | Measure-Object -Property MB -Sum).Sum
     
@@ -80,7 +81,7 @@ function Merge-ProfileCleanerSessionCSVs {
             --neutral-bg: #f3f2f1; --neutral-text: #605e5c;
         }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 40px; }
-        .container { max-width: 1700px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: auto; }
+        .container { max-width: 1850px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: auto; }
         .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edebe9; padding-bottom: 20px; margin-bottom: 20px; }
         h2 { margin: 0; color: var(--primary); font-weight: 300; font-size: 26px; }
         .btn-log { 
@@ -94,20 +95,17 @@ function Merge-ProfileCleanerSessionCSVs {
         .stat-label { font-size: 11px; text-transform: uppercase; color: #605e5c; letter-spacing: 0.8px; margin-bottom: 5px; }
         .stat-value { font-size: 22px; font-weight: 600; color: var(--text); }
         
-        /* TABLE DYNAMISCH ANPASSEN */
         table { width: 100%; border-collapse: collapse; table-layout: auto; min-width: 100%; }
         th { 
             background: #faf9f8; text-align: left; padding: 15px 12px; font-size: 13px; 
             cursor: pointer; border-bottom: 2px solid #edebe9; position: sticky; top: 0; z-index: 10;
             white-space: nowrap; user-select: none; position: relative;
         }
-        .resizer {
-            position: absolute; right: 0; top: 0; width: 6px; height: 100%;
-            cursor: col-resize; z-index: 11;
-        }
+        .resizer { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 11; }
         .resizer:hover { background: var(--primary); opacity: 0.5; }
 
         td { padding: 12px; font-size: 12px; border-bottom: 1px solid #edebe9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .audit-cell { color: #888; font-family: 'Consolas', monospace; font-size: 10px; }
         tr:hover { background-color: #fcfcfc; }
         .status { padding: 4px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; display: inline-block; }
         .status-Erfolgreich-gelöscht, .status-ERFOLG { background: var(--success-bg); color: var(--success-text); }
@@ -142,6 +140,7 @@ function Merge-ProfileCleanerSessionCSVs {
                     <th>Größe</th>
                     <th>Alter</th>
                     <th>Status</th>
+                    <th>Audit Details</th>
                     <th>Ausgeführt von</th>
                 </tr>
             </thead>
@@ -162,6 +161,7 @@ function Merge-ProfileCleanerSessionCSVs {
                     <td data-sort='$valMB'>$displaySize</td>
                     <td data-sort='$valAge'>$displayAge</td>
                     <td><span class='status $statusClass'>$($_.Status)</span></td>
+                    <td class='audit-cell' title='$($_.AuditDetails)'>$($_.AuditDetails)</td>
                     <td title='$($_.RunBy)'>$($_.RunBy)</td>
                 </tr>"
     }
@@ -171,7 +171,6 @@ function Merge-ProfileCleanerSessionCSVs {
         </table>
     </div>
     <script>
-        // --- PERFORMANCE SORTIERUNG (DOM-DETACH) ---
         const getCellValue = (tr, idx) => {
             const td = tr.children[idx];
             return td.getAttribute('data-sort') || td.innerText || td.textContent;
@@ -183,55 +182,39 @@ function Merge-ProfileCleanerSessionCSVs {
 
         document.querySelectorAll('th').forEach(th => th.addEventListener('click', function(e) {
             if (e.target.classList.contains('resizer')) return;
-            
             const table = th.closest('table');
             const tbody = table.querySelector('tbody');
             document.body.style.cursor = 'wait';
-            
             const parent = tbody.parentNode;
-            parent.removeChild(tbody); // Detach für Performance
-
+            parent.removeChild(tbody); 
             const rows = Array.from(tbody.querySelectorAll('tr'));
             const index = Array.from(th.parentNode.children).indexOf(th);
             this.asc = !this.asc;
-
             rows.sort(comparer(index, this.asc)).forEach(tr => tbody.appendChild(tr));
-
             parent.appendChild(tbody);
             document.body.style.cursor = 'default';
         }));
 
-        // --- DYNAMISCHER RESIZER (HYBRID) ---
         document.querySelectorAll('th').forEach(th => {
             const resizer = document.createElement('div');
             resizer.classList.add('resizer');
             th.appendChild(resizer);
-
             resizer.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                
-                const startX = e.pageX;
-                const startWidth = th.offsetWidth;
+                e.stopPropagation(); e.preventDefault();
+                const startX = e.pageX; const startWidth = th.offsetWidth;
                 const table = th.closest('table');
-
-                // Fixiere Layout erst beim ersten Resize
                 if (table.style.tableLayout !== 'fixed') {
                     table.querySelectorAll('th').forEach(h => h.style.width = h.offsetWidth + 'px');
                     table.style.tableLayout = 'fixed';
                 }
-
                 const onMouseMove = (e) => {
                     const newWidth = (startWidth + (e.pageX - startX)) + 'px';
-                    th.style.width = newWidth;
-                    th.style.minWidth = newWidth;
+                    th.style.width = newWidth; th.style.minWidth = newWidth;
                 };
-
                 const onMouseUp = () => {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
                 };
-
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
             });

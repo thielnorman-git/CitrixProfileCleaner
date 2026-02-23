@@ -122,6 +122,7 @@ if ($Sync.ReportData.Count -gt 0) {
     # Den grafischen HTML Report über das entsprechende Modul erzeugen
     if (Test-Path $reportMod) {
         Import-Module $reportMod -Force
+        # WICHTIG: Parameter-Name -SessionPath muss zum psm1 passen
         Merge-ProfileCleanerSessionCSVs -SessionPath $sessionPath
         Write-Host "HTML-Report wurde erstellt." -ForegroundColor Green
     }

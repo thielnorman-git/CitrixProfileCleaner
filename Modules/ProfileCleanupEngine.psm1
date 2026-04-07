@@ -1,4 +1,4 @@
-﻿<#
+﻿﻿<#
 .SYNOPSIS
     Profile Cleanup Engine 2026
 .AUTHOR
@@ -7,7 +7,19 @@
     1.9.1 (Revision 07.04.2026 - GUI Info-Fix)
 .DESCRIPTION
     Zentrale Logik-Engine für die Citrix Profil-Bereinigung. 
-    Zusätzlich: AD-Validierung (Orphaned Check) und Sperrprüfung (NTUSER.DAT).
+    Beinhaltet präzise Größenberechnung, Log-Zentralisierung über die Sync-Brücke 
+    und ein tiefes Audit-Logging (takeown/icacls). 
+    AD-Validierung (Orphaned Check) und Sperrprüfung (NTUSER.DAT).
+.FEATURES
+    - Zentralisierte Logging-Funktion (Write-Log) mit Unterstützung für GUI-Dispatcher und Datei-Logging.
+    - Differenzierte Altersprüfung: DIR-Methode oder INI-Methode (für Citrix UPM).
+    - Automatisierte Besitzübernahme (takeown) und ACL-Korrektur (icacls) vor dem Löschen.
+    - Status-Meldung "Erfolgreich gelöscht" für optimierte HTML-Auswertung.
+    - Vollständige Multi-Threading Unterstützung via $Sync Hashtable.
+    - AD-Validierung (Orphaned Check) und Sperrprüfung (NTUSER.DAT).
+.DEPENDENCIES
+    - Administrator-Rechte (erforderlich für Besitztum-Änderungen an Profilen).
+
 .CHANGELOG
     - 07.04.2026: Info-Log während der Prüfung reaktiviert (GUI-Anzeige).
     - 07.04.2026: Integration von Test-ADAccount, Get-ValidIdentity und Test-IsFolderLocked.

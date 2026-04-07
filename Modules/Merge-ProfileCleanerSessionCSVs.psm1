@@ -6,8 +6,19 @@
 .VERSION
     1.2 (Revision 07.04.2026)
 .DESCRIPTION
+
     Aggregiert CSV-Daten einer Reinigungssitzung zu einem interaktiven HTML-Bericht.
     Erweitert um AD-Identity, Prüfungsmethode und Audit-Details.
+
+
+.FEATURES
+    - Fest integrierter "Log öffnen"-Button im Header.
+    - Dynamische Einheiten-Umrechnung (MB zu GB).
+    - NEU: Spalte für AuditDetails integriert.
+    - JavaScript-basierte Tabellensortierung und Spalten-Resizing.
+    - Aggregiert CSV-Daten einer Reinigungssitzung zu einem interaktiven HTML-Bericht.
+    - Erweitert um AD-Identity, Prüfungsmethode und Audit-Details.
+    
 .CHANGELOG
     - 07.04.2026: Spalten für 'Identity' (AD-Check) und 'Methode' (DIR/INI) hinzugefügt.
     - 07.04.2026: Status-Farben für 'GELÖSCHT' (Orphaned/Alter) verfeinert.

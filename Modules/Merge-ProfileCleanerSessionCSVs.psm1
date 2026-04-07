@@ -4,17 +4,15 @@
 .AUTHOR
     Norman Thiel
 .VERSION
-    1.1 (Revision 20.02.2026)
+    1.2 (Revision 07.04.2026)
 .DESCRIPTION
     Aggregiert CSV-Daten einer Reinigungssitzung zu einem interaktiven HTML-Bericht.
-    Erweitert um die Anzeige der Audit-Details aus der Engine.
-.FEATURES
-    - Fest integrierter "Log öffnen"-Button im Header.
-    - Dynamische Einheiten-Umrechnung (MB zu GB).
-    - NEU: Spalte für AuditDetails integriert.
-    - JavaScript-basierte Tabellensortierung und Spalten-Resizing.
+    Erweitert um AD-Identity, Prüfungsmethode und Audit-Details.
+.CHANGELOG
+    - 07.04.2026: Spalten für 'Identity' (AD-Check) und 'Methode' (DIR/INI) hinzugefügt.
+    - 07.04.2026: Status-Farben für 'GELÖSCHT' (Orphaned/Alter) verfeinert.
+    - 20.02.2026: Löschprozess umgestellt von .NET auf Robocopy.
 #>
-
 function Merge-ProfileCleanerSessionCSVs {
     [CmdletBinding()]
     param(
@@ -42,14 +40,13 @@ function Merge-ProfileCleanerSessionCSVs {
         if (-not $row.PSObject.Properties['RunBy']) { 
             Add-Member -InputObject $row -NoteProperty "RunBy" -Value "N/A" 
         }
-        # Sicherstellen, dass AuditDetails existieren (neu aus Engine)
-        if (-not $row.PSObject.Properties['AuditDetails']) { 
-            Add-Member -InputObject $row -NoteProperty "AuditDetails" -Value "" 
-        }
+        if (-not $row.PSObject.Properties['AuditDetails']) { Add-Member -InputObject $row -NoteProperty "AuditDetails" -Value "" }
+        if (-not $row.PSObject.Properties['Identity']) { Add-Member -InputObject $row -NoteProperty "Identity" -Value "N/A" }
+        if (-not $row.PSObject.Properties['Methode']) { Add-Member -InputObject $row -NoteProperty "Methode" -Value "DIR" }
     }
 
     # --- BERECHNUNG DER KENNZAHLEN ---
-    $relevantData = $data | Where-Object { $_.Status -eq "Erfolgreich gelöscht" -or $_.Status -eq "SIMULATION" }
+    $relevantData = $data | Where-Object { $_.Status -match "gelöscht" -or $_.Status -eq "SIMULATION" }
     $totalMB = ($relevantData | Measure-Object -Property MB -Sum).Sum
     
     $isSimulationMode = $data.Status -contains "SIMULATION"
@@ -81,7 +78,7 @@ function Merge-ProfileCleanerSessionCSVs {
             --neutral-bg: #f3f2f1; --neutral-text: #605e5c;
         }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 40px; }
-        .container { max-width: 1850px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: auto; }
+        .container { max-width: 1920px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: auto; }
         .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edebe9; padding-bottom: 20px; margin-bottom: 20px; }
         h2 { margin: 0; color: var(--primary); font-weight: 300; font-size: 26px; }
         .btn-log { 
@@ -106,9 +103,10 @@ function Merge-ProfileCleanerSessionCSVs {
 
         td { padding: 12px; font-size: 12px; border-bottom: 1px solid #edebe9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .audit-cell { color: #888; font-family: 'Consolas', monospace; font-size: 10px; }
+        .identity-cell { font-weight: 500; color: #444; }
         tr:hover { background-color: #fcfcfc; }
         .status { padding: 4px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; display: inline-block; }
-        .status-Erfolgreich-gelöscht, .status-ERFOLG { background: var(--success-bg); color: var(--success-text); }
+        .status-Erfolgreich-gelöscht, .status-ERFOLG, .status-GELÖSCHT { background: var(--success-bg); color: var(--success-text); }
         .status-SIMULATION { background: var(--warn-bg); color: #9a6700; border: 1px solid #ffd33d; }
         .status-FEHLER { background: var(--error-bg); color: var(--error-text); }
         .status-GEPRÜFT { background: var(--neutral-bg); color: var(--neutral-text); font-weight: normal; }
@@ -136,7 +134,9 @@ function Merge-ProfileCleanerSessionCSVs {
             <thead>
                 <tr>
                     <th>Job</th>
+                    <th>Identity (AD)</th>
                     <th>Pfad</th>
+                    <th>Methode</th>
                     <th>Größe</th>
                     <th>Alter</th>
                     <th>Status</th>
@@ -153,11 +153,15 @@ function Merge-ProfileCleanerSessionCSVs {
         $valAge = if ($_.Alter -as [int]) { [int]$_.Alter } else { 0 }
         $displayAge = if ($_.Alter -eq "N/A") { "N/A" } else { "$valAge Tage" }
         $displaySize = if ($valMB -ge 1024) { "$([math]::Round($valMB / 1024, 2)) GB" } else { "$valMB MB" }
-        $statusClass = "status-$($_.Status.Replace(' ', '-'))"
+        
+        $cleanStatus = if ($_.Status -match "GELÖSCHT") { "GELÖSCHT" } else { $_.Status.Replace(' ', '-') }
+        $statusClass = "status-$cleanStatus"
         
         "                <tr>
                     <td title='$($_.Job)'>$($_.Job)</td>
+                    <td class='identity-cell' title='$($_.Identity)'>$($_.Identity)</td>
                     <td title='$($_.Pfad)'>$($_.Pfad)</td>
+                    <td style='text-align:center'>$($_.Methode)</td>
                     <td data-sort='$valMB'>$displaySize</td>
                     <td data-sort='$valAge'>$displayAge</td>
                     <td><span class='status $statusClass'>$($_.Status)</span></td>
